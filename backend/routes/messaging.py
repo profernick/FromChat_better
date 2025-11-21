@@ -43,11 +43,11 @@ os.makedirs(FILES_ENCRYPTED_DIR, exist_ok=True)
 
 _SPAM_WINDOW_SECONDS = 45
 _SPAM_SIMILARITY_THRESHOLD = 0.88
-_SPAM_MESSAGE_LIMIT = 5
+_SPAM_MESSAGE_LIMIT = 500000000
 _BURST_WINDOW_SECONDS = 30
 _BURST_COUNT_THRESHOLD = 20
-_SHORT_MESSAGE_LENGTH = 8
-_SHORT_MESSAGE_REPEAT_LIMIT = 4
+_SHORT_MESSAGE_LENGTH = 80000
+_SHORT_MESSAGE_REPEAT_LIMIT = 400000
 
 _recent_message_cache: dict[int, deque[tuple[str, str, float]]] = defaultdict(deque)
 _message_rate_cache: dict[int, deque[float]] = defaultdict(deque)
@@ -383,7 +383,6 @@ async def _send_message_internal(
 
 
 @router.post("/send_message")
-@rate_limit_per_ip("30/minute")
 async def send_message(
     request: Request,
     message_request: SendMessageRequest | None = None,
@@ -411,7 +410,6 @@ async def send_message(
 
 
 @router.get("/get_messages")
-@rate_limit_per_ip("60/minute")  # Per-IP limit to prevent abuse
 async def get_messages(request: Request, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     messages = db.query(Message).order_by(Message.timestamp.asc()).all()
 
@@ -426,7 +424,6 @@ async def get_messages(request: Request, current_user: User = Depends(get_curren
 
 
 @router.post("/dm/send")
-@rate_limit_per_ip("20/minute")
 async def dm_send(
     request: Request,
     payload: dict | None = None,
@@ -592,7 +589,6 @@ def convert_envelopes(envs: list[DMEnvelope]):
     }
 
 @router.get("/dm/fetch")
-@rate_limit_per_ip("60/minute")  # Per-IP limit to prevent abuse
 async def dm_fetch(request: Request, since: int | None = None, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     q = db.query(DMEnvelope).filter(DMEnvelope.recipient_id == current_user.id)
     if since:
@@ -601,7 +597,6 @@ async def dm_fetch(request: Request, since: int | None = None, current_user: Use
 
 
 @router.get("/dm/history/{other_user_id}")
-@rate_limit_per_ip("60/minute")  # Per-IP limit to prevent abuse
 async def dm_history(request: Request, other_user_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if other_user_id <= 0:
         raise HTTPException(status_code=400, detail="Invalid user ID")
@@ -626,7 +621,6 @@ async def dm_history(request: Request, other_user_id: int, current_user: User = 
 
 
 @router.get("/dm/conversations")
-@rate_limit_per_ip("60/minute")  # Per-IP limit to prevent abuse
 async def get_dm_conversations(request: Request, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     # Get all DM conversations where current user is involved
     conversations_query = db.query(DMEnvelope).filter(
@@ -669,7 +663,6 @@ async def get_dm_conversations(request: Request, current_user: User = Depends(ge
 
 
 @router.put("/edit_message/{message_id}")
-@rate_limit_per_ip("20/minute")
 async def edit_message(
     request: Request,
     message_id: int,
@@ -746,7 +739,6 @@ async def delete_message(
 
 
 @router.post("/add_reaction")
-@rate_limit_per_ip("50/minute")
 async def add_reaction(
     request: Request,
     reaction_request: ReactionRequest,
@@ -815,7 +807,6 @@ async def add_reaction(
 
 
 @router.post("/dm/add_reaction")
-@rate_limit_per_ip("50/minute")
 async def add_dm_reaction(
     request: Request,
     reaction_request: DMReactionRequest,
