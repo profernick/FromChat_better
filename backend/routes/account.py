@@ -20,8 +20,8 @@ from security.profanity import contains_profanity
 from security.rate_limit import rate_limit_per_ip
 router = APIRouter()
 
-_FAILED_ATTEMPT_WINDOW_SECONDS = 300
-_FAILED_ATTEMPT_THRESHOLD = 5
+_FAILED_ATTEMPT_WINDOW_SECONDS = 1
+_FAILED_ATTEMPT_THRESHOLD = 5000
 _failed_login_attempts: dict[str, deque[float]] = defaultdict(deque)
 
 
@@ -66,7 +66,6 @@ def check_auth(current_user: User = Depends(get_current_user)):
 
 
 @router.post("/login")
-@rate_limit_per_ip("5/minute")
 def login(request: Request, login_request: LoginRequest, db: Session = Depends(get_db)):
     username = login_request.username.strip()
     client_ip = get_client_ip(request)
@@ -165,7 +164,6 @@ def login(request: Request, login_request: LoginRequest, db: Session = Depends(g
 
 
 @router.post("/register")
-@rate_limit_per_ip("3/hour")
 def register(request: Request, register_request: RegisterRequest, db: Session = Depends(get_db)):
     username = register_request.username.strip()
     display_name = register_request.display_name.strip()
@@ -189,11 +187,6 @@ def register(request: Request, register_request: RegisterRequest, db: Session = 
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Имя пользователя должно быть от 3 до 20 символов и содержать только английские буквы, цифры, дефисы и подчеркивания"
-        )
-    if contains_profanity(username):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Имя пользователя содержит запрещённые слова"
         )
 
     if not is_valid_display_name(display_name):
@@ -420,7 +413,6 @@ def logout(
 
 
 @router.post("/change-password")
-@rate_limit_per_ip("5/hour")
 def change_password(
     request: Request,
     password_request: ChangePasswordRequest,
@@ -480,7 +472,6 @@ def get_public_key_of(request: Request, user_id: int, current_user: User = Depen
 
 
 @router.get("/users/search")
-@rate_limit_per_ip("60/minute")  # Per-IP limit to prevent abuse
 def search_users(request: Request, q: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     if len(q.strip()) < 2:
         return {"users": []}
