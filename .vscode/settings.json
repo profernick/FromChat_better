@@ -1,0 +1,7 @@
+{
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/package-lock.json": true,
+        "**/*.module.scss.d.ts": true
+    }
+}

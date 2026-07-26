@@ -1,0 +1,48 @@
+services:
+  backend:
+    build: 
+      dockerfile: deployment/Dockerfile.backend
+      context: ..
+    environment:
+      PORT: 8300
+      JWT_SECRET: ${JWT_SECRET}
+      VAPID_PUBLIC_KEY: ${VAPID_PUBLIC_KEY}
+      VAPID_PRIVATE_KEY: ${VAPID_PRIVATE_KEY}
+    volumes:
+      - data:/app/data
+      - logs:/app/logs
+
+    develop:
+      watch:
+        - action: sync+restart
+          path: ../backend
+          target: /app
+        - action: rebuild
+          path: ../backend/requirements.txt
+
+  frontend:
+    build: 
+      dockerfile: deployment/frontend/Dockerfile
+      context: ..
+    environment:
+      PORT: 8301
+      BACKEND_HOST: http://backend:8300
+    ports:
+      - "8301:8301"
+    depends_on:
+      - backend
+    develop:
+      watch:
+        - action: rebuild
+          path: ../frontend
+        - action: sync+restart
+          path: server.js
+          target: /server/server.js
+        - action: rebuild
+          path: package.json
+
+volumes:
+  data:
+    name: fromchat-data
+  logs:
+    name: fromchat-logs

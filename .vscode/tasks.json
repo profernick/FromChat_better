@@ -1,0 +1,92 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Backend",
+            "type": "npm",
+            "script": "backend:run",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "group": {
+                "kind": "build"
+            },
+            "isBackground": true
+        },
+        {
+            "label": "Frontend (Web)",
+            "type": "npm",
+            "script": "frontend:dev",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "group": {
+                "kind": "build",
+            },
+            "isBackground": true
+        },
+        {
+            "label": "Frontend (Electron)",
+            "type": "npm",
+            "script": "frontend:electron:dev",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "group": {
+                "kind": "build"
+            },
+            "isBackground": true
+        },
+
+        {
+            "label": "Web",
+            "dependsOn": ["Backend", "Frontend (Web)"],
+            "dependsOrder": "parallel",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            },
+            "runOptions": {
+                "runOn": "folderOpen"
+            }
+        },
+        {
+            "label": "Electron",
+            "dependsOn": ["Backend", "Frontend (Electron)"],
+            "dependsOrder": "parallel",
+            "group": {
+                "kind": "build"
+            },
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        }
+    ]
+}

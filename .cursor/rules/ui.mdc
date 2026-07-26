@@ -1,0 +1,13 @@
+---
+alwaysApply: true
+---
+When you work with UI:
+
+1. Use MDUI components through the wrapper: `@/utils/material`. If the component you want to use is missing in that wrapper,
+   add it. Do NOT remove anything.
+3. The supporting text slot for MDUI lists is "description".
+4. When working with lists/sets in states, use the "useImmer" hook.
+5. Do NOT use inline styles in React components if they are static, instead write them in CSS.
+   Find the appropriate file to put the styles in, or create a new one.
+6. In SCSS, for Material Design colors use `$color-dark-<color-name>` variables. For all colors, refer 
+   to `frontend/src/css/_material.scss`.
